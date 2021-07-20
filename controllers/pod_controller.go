@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -85,6 +86,9 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			return ctrl.Result{}, err
 		}
 	}
+
+	// Log the Pod and Timestamp
+	log.Info(fmt.Sprintf("\n\nPod %v \n\nTimestamp %v", instance, instance.Annotations[TimestampAnnotation]))
 
 	return ctrl.Result{}, nil
 }
