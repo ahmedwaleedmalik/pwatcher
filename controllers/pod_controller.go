@@ -20,6 +20,7 @@ import (
 	"context"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -32,23 +33,58 @@ type PodReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
+const (
+	TimestampAnnotation string = "pwatcher.io/timestamp"
+)
+
+//+kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;update;patch
 //+kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=core,resources=pods/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Pod object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.8.3/pkg/reconcile
 func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := log.FromContext(ctx)
 
-	// your logic here
+	// Fetch the Cluster instance
+	instance := &corev1.Pod{}
+
+	// Retrieve Pod Object
+	err := r.Get(context.TODO(), req.NamespacedName, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			log.Info("Object no longer exists")
+
+			// Do not requeue object for reconciliation
+			return ctrl.Result{}, nil
+		}
+
+		// Error reading the object
+		// Requeue the Object for reconciliation with an error
+		return ctrl.Result{}, err
+	}
+
+	// Object has been retrieved successfully at this point
+
+	// TODO: Maybe we can move this logic into a separate method; minimal controller
+	// Add TimestampAnnotation to pod if doesn't already exist
+	if _, ok := instance.ObjectMeta.Annotations[TimestampAnnotation]; !ok {
+		// Annotation doesn't exist
+		// Base object for patch that patches using the merge-patch strategy with the given object as base.
+		baseToPatch := client.MergeFrom(instance.DeepCopy())
+
+		// Update annotations
+		instance.ObjectMeta.Annotations = AddTimestampAnnotation(instance.ObjectMeta.Annotations)
+
+		// Patch the object
+		err := r.Client.Patch(context.TODO(), instance, baseToPatch)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 
 	return ctrl.Result{}, nil
 }
