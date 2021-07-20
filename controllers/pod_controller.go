@@ -45,7 +45,7 @@ const (
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
+	log := log.FromContext(ctx).WithValues("pwatcher-controller", req.NamespacedName)
 
 	// Fetch the Cluster instance
 	instance := &corev1.Pod{}
@@ -78,7 +78,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		baseToPatch := client.MergeFrom(instance.DeepCopy())
 
 		// Update annotations
-		instance.ObjectMeta.Annotations = AddTimestampAnnotation(instance.ObjectMeta.Annotations)
+		instance.ObjectMeta.Annotations = addTimestampAnnotation(instance.ObjectMeta.Annotations)
 
 		// Patch the object
 		err := r.Client.Patch(context.TODO(), instance, baseToPatch)
@@ -88,7 +88,8 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	}
 
 	// Log the Pod and Timestamp
-	log.Info(fmt.Sprintf("\n\nPod %v \n\nTimestamp %v", instance, instance.Annotations[TimestampAnnotation]))
+	// TODO: Maybe we can just print out pod-namespace/pod-name and timestamp
+	log.Info(fmt.Sprintf("\nPod %v/%v - Timestamp %v", instance.ObjectMeta.Namespace, instance.ObjectMeta.Name, instance.Annotations[TimestampAnnotation]))
 
 	return ctrl.Result{}, nil
 }
