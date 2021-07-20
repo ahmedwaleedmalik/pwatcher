@@ -72,23 +72,25 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 
 	// TODO: Maybe we can move this logic into a separate method; minimal controller
 	// Add TimestampAnnotation to pod if doesn't already exist
-	if _, ok := instance.ObjectMeta.Annotations[TimestampAnnotation]; !ok {
-		// Annotation doesn't exist
-		// Base object for patch that patches using the merge-patch strategy with the given object as base.
-		baseToPatch := client.MergeFrom(instance.DeepCopy())
-
-		// Update annotations
-		instance.ObjectMeta.Annotations = addTimestampAnnotation(instance.ObjectMeta.Annotations)
-
-		// Patch the object
-		err := r.Client.Patch(context.TODO(), instance, baseToPatch)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	if _, ok := instance.ObjectMeta.Annotations[TimestampAnnotation]; ok {
+		// Annotation already exists
+		return ctrl.Result{}, nil
 	}
 
+	// Annotation doesn't exist
+	// Base object for patch that patches using the merge-patch strategy with the given object as base.
+	baseToPatch := client.MergeFrom(instance.DeepCopy())
+
+	// Update annotations
+	instance.ObjectMeta.Annotations = addTimestampAnnotation(instance.ObjectMeta.Annotations)
+
+	// Patch the object
+	err = r.Patch(context.TODO(), instance, baseToPatch)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	
 	// Log the Pod and Timestamp
-	// TODO: Maybe we can just print out pod-namespace/pod-name and timestamp
 	log.Info(fmt.Sprintf("\nPod %v/%v - Timestamp %v", instance.ObjectMeta.Namespace, instance.ObjectMeta.Name, instance.Annotations[TimestampAnnotation]))
 
 	return ctrl.Result{}, nil
