@@ -56,6 +56,14 @@ func filterCreatePredicate(client client.Client) predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
 			pod := e.Object.(*corev1.Pod)
+
+			// Drop pre-existing pods, so that they are not queued for reconciliation
+			// TODO: This condition needs to be improved
+			if len(pod.Status.PodIP) != 0 {
+				return false
+			}
+
+			// Check for filters
 			return isObservableNamespace(client, pod) && isObservablePod(pod)
 		},
 	}
