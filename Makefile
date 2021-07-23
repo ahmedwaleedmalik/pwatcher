@@ -1,6 +1,9 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+VERSION ?= 0.0.1
+IMAGE_TAG_BASE ?= ahmedwaleedmalik/pwatcher
+IMG ?= $(IMAGE_TAG_BASE):v$(VERSION)
+
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 
@@ -106,3 +109,8 @@ GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef
+
+bump-chart:
+	sed -i "s/^version:.*/version: $(VERSION)/" charts/pwatcher/Chart.yaml
+	sed -i "s/^appVersion:.*/appVersion: $(VERSION)/" charts/pwatcher/Chart.yaml
+	sed -i "s/tag:.*/tag: v$(VERSION)/" charts/pwatcher/values.yaml

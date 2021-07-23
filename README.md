@@ -11,5 +11,5 @@ Example Kubernetes Controller built with the `kubebuilder`
 ## TODO
 
 - Add `local development` section
-- Add guide to run operator
+- Add guide to run controller
 - Add guide to deploy via helm chart. Also add readme for helm chart

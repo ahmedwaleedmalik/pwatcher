@@ -12,16 +12,8 @@ rules:
   - pods
   verbs:
   - get
-  - list
   - patch
-  - update
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - pods/finalizers
-  verbs:
-  - update
 - apiGroups:
   - ""
   resources:
@@ -29,4 +21,3 @@ rules:
   verbs:
   - get
   - patch
-  - update

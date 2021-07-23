@@ -19,8 +19,8 @@ func addTimestampAnnotation(annotations map[string]string) map[string]string {
 	return annotations
 }
 
-// ignoreDelete will suppress Delete events
-func ignoreDelete() predicate.Predicate {
+// ignoreDeletePredicate will suppress Delete events
+func ignoreDeletePredicate() predicate.Predicate {
 	return predicate.Funcs{
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			return false
@@ -28,8 +28,8 @@ func ignoreDelete() predicate.Predicate {
 	}
 }
 
-// ignoreUpdate will suppress Update events
-func ignoreUpdate() predicate.Predicate {
+// ignoreUpdatePredicate will suppress Update events
+func ignoreUpdatePredicate() predicate.Predicate {
 	return predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			return false
