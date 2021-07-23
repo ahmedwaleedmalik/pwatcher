@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/ahmedwaleedmalik/pwatcher/config"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -41,32 +42,53 @@ func ignoreUpdatePredicate() predicate.Predicate {
 	}
 }
 
+// ignoreGenericPredicate will suppress Generic events
+func ignoreGenericPredicate() predicate.Predicate {
+	return predicate.Funcs{
+		GenericFunc: func(e event.GenericEvent) bool {
+			return false
+		},
+	}
+}
+
 // filterCreatePredicate will apply filters based on pod and namespace annotations
 func filterCreatePredicate(client client.Client) predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
 			pod := e.Object.(*corev1.Pod)
-			return isObservedPod(client, pod)
+			return isObservableNamespace(client, pod) && isObservablePod(pod)
 		},
 	}
 }
 
-func isObservedPod(client client.Client, pod *corev1.Pod) bool {
-	// Consider resource for reconciliation only if it has the required annotation
-	if _, ok := pod.GetAnnotations()["timestamp"]; ok {
-		return true
-	}
+// isObservableNamespace ensures that namespace that contains the pod has required annotation, if namespace filter key is defined
+func isObservableNamespace(client client.Client, pod *corev1.Pod) bool {
+	// Check if Namespace Filter Key exists
+	if len(config.NamespaceFilterKey) != 0 {
+		// Retrieve namespace
+		namespace := &corev1.Namespace{}
+		err := client.Get(context.TODO(), types.NamespacedName{Name: pod.ObjectMeta.Namespace}, namespace)
+		if err != nil {
+			return false
+		}
 
-	// Retrieve namespace
-	namespace := &corev1.Namespace{}
-	err := client.Get(context.TODO(), types.NamespacedName{Name: pod.ObjectMeta.Namespace}, namespace)
-	if err != nil {
+		// Consider resource for reconciliation only if the namespace in which it exists has the required annotation
+		if _, ok := namespace.GetAnnotations()["timestamp"]; ok {
+			return true
+		}
 		return false
 	}
+	return true
+}
 
-	// Consider resource for reconciliation only if the namespace in which it exists has the required annotation
-	if _, ok := namespace.GetAnnotations()["timestamp"]; ok {
-		return true
+// isObservablePod ensures that pod has required annotation, if pod filter key is defined
+func isObservablePod(pod *corev1.Pod) bool {
+	// Consider resource for reconciliation only if it has the required annotation
+	if len(config.PodFilterKey) != 0 {
+		if _, ok := pod.GetAnnotations()["timestamp"]; ok {
+			return true
+		}
+		return false
 	}
-	return false
+	return true
 }
