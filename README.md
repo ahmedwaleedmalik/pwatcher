@@ -64,3 +64,9 @@ To install using `kustomize`
 
 - Ensure that a valid kubeconfig is loaded
 - Run `make run` from the root directory to build and execute the binary
+
+#### Test for filters
+
+- Run `NAMESPACE_FILTER_KEY=pwatcher-test POD_FILTER_KEY=pwatcher-test make run` to run the controller
+- Run `kubectl apply -f examples/manifest.yaml` to create resource that complies with the filters
+- `kubectl get pod pwatcher-test -n pwatcher-test -o jsonpath='{.metadata.annotations}'` to check that the `pwatcher.io/timestamp` annotation has been added
