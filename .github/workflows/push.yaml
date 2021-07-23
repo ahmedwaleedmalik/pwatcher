@@ -99,6 +99,8 @@ jobs:
       uses: stefanprodan/helm-gh-pages@master
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+        charts_dir: charts
+        linting: on
 
     # Commit back changes
     - name: Commit files
