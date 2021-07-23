@@ -9,7 +9,7 @@ maintainers:
     email: ahmedwaleedmalik@gmail.com
 
 # Helm chart Version
-version: 0.0.2
+version: 0.0.3
 
 # Application version to be deployed
-appVersion: 0.0.2
+appVersion: 0.0.3
