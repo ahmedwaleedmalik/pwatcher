@@ -68,7 +68,7 @@ jobs:
         cache-to: type=inline
         tags: |
           ${{ github.repository }}:${{ steps.generate_tag.outputs.new_tag }}
-          latest
+          ${{ github.repository }}:latest
         labels: |
           org.opencontainers.image.source=${{ github.event.repository.clone_url }}
           org.opencontainers.image.created=${{ steps.prep.outputs.created }}
