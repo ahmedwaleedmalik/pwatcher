@@ -8,6 +8,7 @@ To install the chart with the release name `my-release`:
 
 ```console
 helm repo add pwatcher https://ahmedwaleedmalik.github.io/pwatcher
+helm repo update
 helm upgrade -i my-release pwatcher/pwatcher
 ```
 

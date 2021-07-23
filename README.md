@@ -39,6 +39,24 @@ To facilitate this, we added a new environment variable `NAMESPACE_FILTER_KEY`. 
 
 [predicate](https://stuartleeks.com/posts/kubebuilder-event-filters-part-1-delete/) was used to add this filter. We added the logic to drop namespace, containing the pod, that doesn't have the required key in annotations. `Create` event in the `predicate` was used for this.
 
+#### Alternate Approach
+
+An alternate approach for this would have been to:
+
+1. Compute list of namespaces that contain the annotation
+2. Update manager options and specify namespaces like:
+
+```go
+// Options are the arguments to specify manager configuration
+options := ctrl.Options{}
+
+// watchNamespace contains comma separated list of namespaces (e.g ns1,ns2)
+options.Namespace = ""
+options.NewCache = cache.MultiNamespacedCacheBuilder(strings.Split(watchNamespace, ","))
+```
+
+This idea was dropped because the biggest downside of this is that this list is populated when the controller is initialized. We cannot change this list at the runtime. So any new namespaces that will have this annotation will be ignored.
+
 ## Installation
 
 ### Helm Chart
