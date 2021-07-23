@@ -5,6 +5,14 @@ image:
   tag: v0.0.1
   pullPolicy: IfNotPresent
 
+podFilter:
+  enabled: false
+  key: timestamp
+
+namespaceFilter:
+  enabled: false
+  key: timestamp
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
