@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -32,6 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/ahmedwaleedmalik/pwatcher/controllers"
+	"github.com/ahmedwaleedmalik/pwatcher/pkg/config"
 	corev1 "k8s.io/api/core/v1"
 	//+kubebuilder:scaffold:imports
 )
@@ -94,6 +96,13 @@ func main() {
 	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up ready check")
 		os.Exit(1)
+	}
+
+	if len(config.NamespaceFilterKey) != 0 {
+		setupLog.Info(fmt.Sprintf("Namespace filter is set with key %v", config.NamespaceFilterKey))
+	}
+	if len(config.PodFilterKey) != 0 {
+		setupLog.Info(fmt.Sprintf("Pod filter is set with key %v", config.PodFilterKey))
 	}
 
 	setupLog.Info("starting manager")
