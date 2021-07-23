@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -38,9 +37,8 @@ const (
 	TimestampAnnotation string = "pwatcher.io/timestamp"
 )
 
-//+kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;update;patch
-//+kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=core,resources=pods/finalizers,verbs=update
+//+kubebuilder:rbac:groups=core,resources=pods,verbs=get;watch;patch
+//+kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -69,29 +67,11 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	}
 
 	// Object has been retrieved successfully at this point
-
-	// TODO: Maybe we can move this logic into a separate method; minimal controller
 	// Add TimestampAnnotation to pod if doesn't already exist
-	if _, ok := instance.ObjectMeta.Annotations[TimestampAnnotation]; ok {
-		// Annotation already exists
-		return ctrl.Result{}, nil
+	if _, ok := instance.ObjectMeta.Annotations[TimestampAnnotation]; !ok {
+		// Annotation the pod with 
+		return r.annotateResource(instance)
 	}
-
-	// Annotation doesn't exist
-	// Base object for patch that patches using the merge-patch strategy with the given object as base.
-	baseToPatch := client.MergeFrom(instance.DeepCopy())
-
-	// Update annotations
-	instance.ObjectMeta.Annotations = addTimestampAnnotation(instance.ObjectMeta.Annotations)
-
-	// Patch the object
-	err = r.Patch(context.TODO(), instance, baseToPatch)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-	
-	// Log the Pod and Timestamp
-	log.Info(fmt.Sprintf("\nPod %v/%v - Timestamp %v", instance.ObjectMeta.Namespace, instance.ObjectMeta.Name, instance.Annotations[TimestampAnnotation]))
 
 	return ctrl.Result{}, nil
 }
@@ -100,7 +80,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 func (r *PodReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1.Pod{}).
-		WithEventFilter(ignoreDelete()).
-		WithEventFilter(ignoreUpdate()).
+		WithEventFilter(ignoreDeletePredicate()).
+		WithEventFilter(ignoreUpdatePredicate()).
 		Complete(r)
 }
