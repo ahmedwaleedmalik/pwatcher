@@ -37,7 +37,7 @@ const (
 	TimestampAnnotation string = "pwatcher.io/timestamp"
 )
 
-//+kubebuilder:rbac:groups=core,resources=pods,verbs=get;watch;patch
+//+kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;patch
 //+kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
