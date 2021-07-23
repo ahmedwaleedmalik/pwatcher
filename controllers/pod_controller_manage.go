@@ -14,7 +14,7 @@ const (
 	PodTimestampLogFormat string = "\nPod %v/%v - Timestamp %v"
 )
 
-func (r *PodReconciler) annotateResource(instance *corev1.Pod) (ctrl.Result, error) {
+func (r *PodReconciler) annotatePodWithTimestamp(instance *corev1.Pod) (ctrl.Result, error) {
 	log := log.FromContext(context.Background())
 
 	// Base object used for patching

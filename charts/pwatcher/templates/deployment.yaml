@@ -45,6 +45,17 @@ spec:
         - --leader-elect
         command:
         - /manager
+        {{- if or (eq .Values.podFilter.enabled true) (eq .Values.namespaceFilter.enabled true) }}
+        env:
+        {{- if .Values.podFilter.enabled }}
+        - name: POD_FILTER_KEY
+          value: {{ .Values.podFilter.key }}
+        {{- end }}
+        {{- if .Values.namespaceFilter.enabled }}
+        - name: NAMESPACE_FILTER_KEY
+          value: {{ .Values.namespaceFilter.key }}
+        {{- end }}
+        {{- end }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:

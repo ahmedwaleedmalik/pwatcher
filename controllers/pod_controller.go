@@ -69,8 +69,8 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	// Object has been retrieved successfully at this point
 	// Add TimestampAnnotation to pod if doesn't already exist
 	if _, ok := instance.ObjectMeta.Annotations[TimestampAnnotation]; !ok {
-		// Annotation the pod with 
-		return r.annotateResource(instance)
+		// Annotation the pod with Timestamp
+		return r.annotatePodWithTimestamp(instance)
 	}
 
 	return ctrl.Result{}, nil
@@ -82,5 +82,7 @@ func (r *PodReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&corev1.Pod{}).
 		WithEventFilter(ignoreDeletePredicate()).
 		WithEventFilter(ignoreUpdatePredicate()).
+		WithEventFilter(ignoreGenericPredicate()).
+		WithEventFilter(filterCreatePredicate(mgr.GetClient())).
 		Complete(r)
 }
