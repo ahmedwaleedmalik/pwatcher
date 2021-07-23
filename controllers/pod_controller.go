@@ -70,7 +70,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	// Add TimestampAnnotation to pod if doesn't already exist
 	if _, ok := instance.ObjectMeta.Annotations[TimestampAnnotation]; !ok {
 		// Annotation the pod with Timestamp
-		return r.annotateResource(instance)
+		return r.annotatePodWithTimestamp(instance)
 	}
 
 	return ctrl.Result{}, nil

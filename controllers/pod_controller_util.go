@@ -73,7 +73,7 @@ func isObservableNamespace(client client.Client, pod *corev1.Pod) bool {
 		}
 
 		// Consider resource for reconciliation only if the namespace in which it exists has the required annotation
-		if _, ok := namespace.GetAnnotations()["timestamp"]; ok {
+		if _, ok := namespace.GetAnnotations()[config.NamespaceFilterKey]; ok {
 			return true
 		}
 		return false
@@ -85,7 +85,7 @@ func isObservableNamespace(client client.Client, pod *corev1.Pod) bool {
 func isObservablePod(pod *corev1.Pod) bool {
 	// Consider resource for reconciliation only if it has the required annotation
 	if len(config.PodFilterKey) != 0 {
-		if _, ok := pod.GetAnnotations()["timestamp"]; ok {
+		if _, ok := pod.GetAnnotations()[config.PodFilterKey]; ok {
 			return true
 		}
 		return false
