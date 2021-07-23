@@ -5,12 +5,12 @@ import (
 )
 
 const (
-	podFilterEnvVariable string = "POD_FILTER_KEY"
+	podFilterEnvVariable       string = "POD_FILTER_KEY"
 	namespaceFilterEnvVariable string = "NAMESPACE_FILTER_KEY"
 )
 
 var (
-	PodFilterKey string = getPodFilterKey()
+	PodFilterKey       string = getPodFilterKey()
 	NamespaceFilterKey string = getNamespaceFilterKey()
 )
 

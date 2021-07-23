@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ahmedwaleedmalik/pwatcher/config"
+	"github.com/ahmedwaleedmalik/pwatcher/pkg/config"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
