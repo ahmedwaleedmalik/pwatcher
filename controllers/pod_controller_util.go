@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/ahmedwaleedmalik/pwatcher/pkg/config"
@@ -10,6 +11,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+)
+
+const (
+	kubeNamespacePrefix string = "kube-"
 )
 
 // addTimestampAnnotation adds the Timestamp annotation with the value set to the current time
@@ -24,27 +29,15 @@ func addTimestampAnnotation(annotations map[string]string) map[string]string {
 	return annotations
 }
 
-// ignoreDeletePredicate will suppress Delete events
-func ignoreDeletePredicate() predicate.Predicate {
+// onlyAllowCreateActionPredicate will suppress Delete, Update and Generic events
+func onlyAllowCreateActionPredicate() predicate.Predicate {
 	return predicate.Funcs{
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			return false
 		},
-	}
-}
-
-// ignoreUpdatePredicate will suppress Update events
-func ignoreUpdatePredicate() predicate.Predicate {
-	return predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			return false
 		},
-	}
-}
-
-// ignoreGenericPredicate will suppress Generic events
-func ignoreGenericPredicate() predicate.Predicate {
-	return predicate.Funcs{
 		GenericFunc: func(e event.GenericEvent) bool {
 			return false
 		},
@@ -57,8 +50,12 @@ func filterCreatePredicate(client client.Client) predicate.Predicate {
 		CreateFunc: func(e event.CreateEvent) bool {
 			pod := e.Object.(*corev1.Pod)
 
+			// Ignore pods from system namespaces
+			if isProhibitedNamespace(pod.ObjectMeta.Namespace) {
+				return false
+			}
+
 			// Drop pre-existing pods, so that they are not queued for reconciliation
-			// TODO: This condition needs to be improved
 			if len(pod.Status.PodIP) != 0 {
 				return false
 			}
@@ -99,4 +96,8 @@ func isObservablePod(pod *corev1.Pod) bool {
 		return false
 	}
 	return true
+}
+
+func isProhibitedNamespace(namespace string) bool {
+	return strings.HasPrefix(namespace, kubeNamespacePrefix)
 }
