@@ -80,9 +80,7 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 func (r *PodReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1.Pod{}).
-		WithEventFilter(ignoreDeletePredicate()).
-		WithEventFilter(ignoreUpdatePredicate()).
-		WithEventFilter(ignoreGenericPredicate()).
+		WithEventFilter(onlyAllowCreateActionPredicate()).
 		WithEventFilter(filterCreatePredicate(mgr.GetClient())).
 		Complete(r)
 }
