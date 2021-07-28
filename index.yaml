@@ -2,6 +2,19 @@ apiVersion: v1
 entries:
   pwatcher:
   - apiVersion: v2
+    appVersion: 0.0.8
+    created: "2021-07-28T06:30:05.958270447Z"
+    description: A Helm chart for Kubernetes
+    digest: e81680e55429e7872c0b668079721c7a3d1f6de692e544db3d243d603341d281
+    maintainers:
+    - email: ahmedwaleedmalik@gmail.com
+      name: ahmedwaleedmalik
+    name: pwatcher
+    type: application
+    urls:
+    - https://ahmedwaleedmalik.github.io/pwatcher/pwatcher-0.0.8.tgz
+    version: 0.0.8
+  - apiVersion: v2
     appVersion: 0.0.7
     created: "2021-07-28T06:09:16.204537922Z"
     description: A Helm chart for Kubernetes
@@ -105,4 +118,4 @@ entries:
     urls:
     - https://ahmedwaleedmalik.github.io/pwatcher/pwatcher-0.0.1-ac958f3.tgz
     version: 0.0.1-ac958f3
-generated: "2021-07-28T06:09:16.202453994Z"
+generated: "2021-07-28T06:30:05.957586243Z"
